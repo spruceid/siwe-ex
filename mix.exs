@@ -21,7 +21,9 @@ defmodule Siwe.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:abnf_parsec, "~> 1.0", runtime: false}
+      {:rustler, "~> 0.22.2"},
+      # NOTE: For M1 compat:
+      # {:rustler, git: "https://github.com/rusterlium/rustler.git", sparse: "rustler_mix"}
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]
