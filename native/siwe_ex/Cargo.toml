@@ -1,0 +1,16 @@
+[package]
+name = "siwe_ex"
+version = "0.1.0"
+authors = []
+edition = "2018"
+
+[lib]
+name = "siwe_ex"
+path = "src/lib.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+ethers-core = "0.6.2"
+hex = "0.4.3"
+rustler = "0.22.2"
+siwe = { path = "../../../siwe-rs" }
