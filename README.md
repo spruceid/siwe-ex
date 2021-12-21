@@ -1,56 +1,25 @@
 # Sign-In with Ethereum 
 
-Sign-In with Ethereum message validation for Elixir.
+Elixir library to enable [Sign-In with Ethereum](https://login.xyz) message validation; see siwe repo for more context and interface definition for other [SIWE](https://github.com/spruceid/siwe) libraries and systems.
+
+Full documentation found at <https://hexdocs.pm/siwe>.
+
+This library provides functions for parsing and validating [SIWE](https://github.com/ethereum/EIPs/pull/4361) message strings and their corresponding signatures.
 
 ## Installation
 
-SIWE can be installed by including it in your list of dependencies in `mix.exs`:
+The package can be installed by adding `siwe` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:siwe, "~> 0.1.0"}
+    {:siwe, "~> 0.2.0"}
   ]
 end
 ```
+## Example
 
-## Usage
-
-Full documentation found at <https://hexdocs.pm/siwe>.
-
-This library exposes the `verify!(message, signature)` function that takes a [SIWE](https://eips.ethereum.org/EIPS/eip-4361) message and the corresponding signature, and returns a parsed form of the SIWE message if the message is valid.
-
-Valid in this context means:
-
-- The signature matches the message for the address present in the message.
-
-- The current time is after the message's optional `not_before`.
-
-- The current time is before the message's optional `expiration_time`.
-
-Other considerations, such as domain and nonce matching, are left to the calling application.
-
-The returned structure is useful for this purpose:
-```elixir
-  defmodule Message do
-    defstruct domain: "",
-      address: "",
-      statement: "",
-      uri: "",
-      version: "",
-      chain_id: "",
-      nonce: "",
-      issued_at: "",
-      expiration_time: nil, # or a string datetime
-      not_before: nil, # or a string datetime
-      request_id: nil, # or string
-      resources: []
-  end
-```
-
-### Example
-
-Clone this repository and from the root run:
+To see how this works in `iex` clone this repository and from the root run:
 ```bash
 $ mix deps.get
 ```
@@ -79,12 +48,89 @@ $ iex -S mix
 ```
 Once in iex, you can then run the following to see the result:
 ```
-iex)> {:ok, msg} = File.read("./message.txt")
-iex)> {:ok, sig} = File.read("./signature.txt")
-iex)> Siwe.verify!(msg, sig)
+iex> {:ok, msg} = File.read("./message.txt")
+...
+iex> {:ok, sig} = File.read("./signature.txt")
+...
+iex> Siwe.parse_if_valid!(String.trim(msg), String.trim(sig))
+%{
+  __struct__: Siwe,
+  address: "0xfA151B5453CE69ABf60f0dbdE71F6C9C5868800E",
+  chain_id: "1",
+  domain: "login.xyz",
+  expiration_time: nil,
+  issued_at: "2021-12-17T00:38:39.834Z",
+  nonce: "ToTaLLyRanDOM",
+  not_before: nil,
+  request_id: nil,
+  resources: [],
+  statement: "Sign-In With Ethereum Example Statement",
+  uri: "https://login.xyz",
+  version: "1"
+}
 ```
-Any valid SIWE message and signature pair can be substituted.
 
+To see the result, a parsed SIWE message described in more detail below. Any valid SIWE message and signature pair can be substituted.The functions described below can also be tested with `msg`, `sig`, or a value set to the result `Siwe.parse_if_valid!`.
+
+## API Overview
+This library deals with three different types of input:
+
+1) SIWE message strings.
+2) Signatures of SIWE message strings.
+3) A parsed SIWE message which is defined as:
+
+```elixir
+  defmodule Message do
+    defstruct domain: "",
+      address: "",
+      statement: "",
+      uri: "",
+      version: "",
+      chain_id: "",
+      nonce: "",
+      issued_at: "",
+      expiration_time: nil, # or a string datetime
+      not_before: nil, # or a string datetime
+      request_id: nil, # or string
+      resources: []
+  end
+```
+
+The most basic functions are `from_str!` and `to_str!` which translate a SIWE message string to a parsed SIWE message and back (respectively). To simplify using the variables from the above example:
+
+```
+iex> parsed = Siwe.from_str!(String.trim(msg))
+...
+iex> Siwe.to_str!(parsed) == String.trim(msg)
+:true
+```
+
+Once parsed, the `Message` can be validated. 
+
+`validate_time` returns true if current time is after the `Message`'s `not_before` field (if it exists) and before the `Message`'s `expiration_time` field (if it exists). 
+
+`validate_sig` takes the `Message` and a corresponding `signature` and returns true if the `Message`'s `address` field would produce the `signature` if it had signed the `Message`'s string form.
+
+`validate` returns true only if both `validate_time` and `validate_sig` would.
+
+```
+iex> Siwe.validate_sig(parsed, String.trim(sig))
+:true
+iex> Siwe.validate_time(parsed)
+:true
+iex> Siwe.validate(parsed, String.trim(sig))
+:true
+```
+
+A trio of optimized helpers can be used to combine these steps:
+
+`parse_if_valid_sig!` takes a SIWE message string and `signature`, then returns a parsed `Message` only if the `signature` matches.
+
+`parse_if_valid_time!` takes a SIWE message string then returns a parsed `Message` only if the current time is after the `Message`'s `not_before` field (if it exists) and before the `Message`'s `expiration_time` field (if it exists). 
+
+`parse_if_valid!` takes a SIWE message string and a `signature` then returns a parsed `Message` only if the `signature` matches and the current time is after the `Message`'s `not_before` field (if it exists) and before the `Message`'s `expiration_time` field (if it exists). 
+
+Complete documentation is available [here](https://hexdocs.pm/siwe).
 ## See Also
 
 - [Sign-In with Ethereum: TypeScript](https://github.com/spruceid/siwe)
