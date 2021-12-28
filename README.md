@@ -1,11 +1,10 @@
-# Siwe
+# Sign-In with Ethereum 
 
-Sign-In with Ethereum message validation for Elixir
+Sign-In with Ethereum message validation for Elixir.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `siwe` to your list of dependencies in `mix.exs`:
+SIWE can be installed by including it in your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
@@ -15,23 +14,19 @@ def deps do
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/siwe>.
-
 ## Usage
 
 Full documentation found at <https://hexdocs.pm/siwe>.
 
-This library exposes the `verify!(message, signature)` function that takes a [SIWE](https://github.com/ethereum/EIPs/pull/4361) message, the corresponding signature, and returns a parsed form of the SIWE message if the message is valid. It raises if the message isn't. 
+This library exposes the `verify!(message, signature)` function that takes a [SIWE](https://eips.ethereum.org/EIPS/eip-4361) message and the corresponding signature, and returns a parsed form of the SIWE message if the message is valid.
 
 Valid in this context means:
 
-The signature matches the message for the address present in the message.
+- The signature matches the message for the address present in the message.
 
-The current time is after the message's optional `not_before`.
+- The current time is after the message's optional `not_before`.
 
-The current time is before the message's optional `expiration_time`.
+- The current time is before the message's optional `expiration_time`.
 
 Other considerations, such as domain and nonce matching, are left to the calling application.
 
@@ -82,10 +77,17 @@ then run
 ```
 $ iex -S mix
 ```
-Once in iex, you can then:
+Once in iex, you can then run the following to see the result:
 ```
 iex)> {:ok, msg} = File.read("./message.txt")
 iex)> {:ok, sig} = File.read("./signature.txt")
 iex)> Siwe.verify!(msg, sig)
 ```
-To see the result. Any valid SIWE message and signature pair can be substituted.
+Any valid SIWE message and signature pair can be substituted.
+
+## See Also
+
+- [Sign-In with Ethereum: TypeScript](https://github.com/spruceid/siwe)
+- [Example SIWE application: login.xyz](https://login.xyz)
+- [EIP-4361 Specification Draft](https://eips.ethereum.org/EIPS/eip-4361)
+- [EIP-191 Specification](https://eips.ethereum.org/EIPS/eip-191)
