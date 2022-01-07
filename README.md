@@ -1,10 +1,10 @@
 # Sign-In with Ethereum 
 
-Elixir library to enable [Sign-In with Ethereum](https://login.xyz) message validation; see siwe repo for more context and interface definition for other [SIWE](https://github.com/spruceid/siwe) libraries and systems.
+Elixir library to enable [Sign-In with Ethereum](https://login.xyz) message validation.
 
 Full documentation found at <https://hexdocs.pm/siwe>.
 
-This library provides functions for parsing and validating [SIWE](https://github.com/ethereum/EIPs/pull/4361) message strings and their corresponding signatures.
+This library provides functions for parsing and validating [SIWE](hhttps://eips.ethereum.org/EIPS/eip-4361) message strings and their corresponding signatures.
 
 ## Installation
 
@@ -19,7 +19,7 @@ end
 ```
 ## Example
 
-To see how this works in `iex` clone this repository and from the root run:
+To see how this works in `iex`, clone this repository and from the root run:
 ```bash
 $ mix deps.get
 ```
@@ -70,7 +70,7 @@ iex> Siwe.parse_if_valid!(String.trim(msg), String.trim(sig))
 }
 ```
 
-To see the result, a parsed SIWE message described in more detail below. Any valid SIWE message and signature pair can be substituted.The functions described below can also be tested with `msg`, `sig`, or a value set to the result `Siwe.parse_if_valid!`.
+Any valid SIWE message and signature pair can be substituted.The functions described below can also be tested with `msg`, `sig`, or a value set to the result `Siwe.parse_if_valid!`.
 
 ## API Overview
 This library deals with three different types of input:
@@ -107,11 +107,11 @@ iex> Siwe.to_str!(parsed) == String.trim(msg)
 
 Once parsed, the `Message` can be validated. 
 
-`validate_time` returns true if current time is after the `Message`'s `not_before` field (if it exists) and before the `Message`'s `expiration_time` field (if it exists). 
+- `validate_time` returns true if current time is after the `Message`'s `not_before` field (if it exists) and before the `Message`'s `expiration_time` field (if it exists). 
 
-`validate_sig` takes the `Message` and a corresponding `signature` and returns true if the `Message`'s `address` field would produce the `signature` if it had signed the `Message`'s string form.
+- `validate_sig` takes the `Message` and a corresponding `signature` and returns true if the `Message`'s `address` field would produce the `signature` if it had signed the `Message`'s string form.
 
-`validate` returns true only if both `validate_time` and `validate_sig` would.
+- `validate` returns true only if both `validate_time` and `validate_sig` would.
 
 ```
 iex> Siwe.validate_sig(parsed, String.trim(sig))
@@ -124,16 +124,16 @@ iex> Siwe.validate(parsed, String.trim(sig))
 
 A trio of optimized helpers can be used to combine these steps:
 
-`parse_if_valid_sig!` takes a SIWE message string and `signature`, then returns a parsed `Message` only if the `signature` matches.
+- `parse_if_valid_sig!` takes a SIWE message string and `signature`, then returns a parsed `Message` only if the `signature` matches.
 
-`parse_if_valid_time!` takes a SIWE message string then returns a parsed `Message` only if the current time is after the `Message`'s `not_before` field (if it exists) and before the `Message`'s `expiration_time` field (if it exists). 
+- `parse_if_valid_time!` takes a SIWE message string then returns a parsed `Message` only if the current time is after the `Message`'s `not_before` field (if it exists) and before the `Message`'s `expiration_time` field (if it exists). 
 
-`parse_if_valid!` takes a SIWE message string and a `signature` then returns a parsed `Message` only if the `signature` matches and the current time is after the `Message`'s `not_before` field (if it exists) and before the `Message`'s `expiration_time` field (if it exists). 
+- `parse_if_valid!` takes a SIWE message string and a `signature` then returns a parsed `Message` only if the `signature` matches and the current time is after the `Message`'s `not_before` field (if it exists) and before the `Message`'s `expiration_time` field (if it exists). 
 
-Complete documentation is available [here](https://hexdocs.pm/siwe).
 ## See Also
 
 - [Sign-In with Ethereum: TypeScript](https://github.com/spruceid/siwe)
+- [Sign-In with Ethereum: Rust](https://github.com/spruceid/siwe-rs)
 - [Example SIWE application: login.xyz](https://login.xyz)
-- [EIP-4361 Specification Draft](https://eips.ethereum.org/EIPS/eip-4361)
+- [EIP-4361 Specification](https://eips.ethereum.org/EIPS/eip-4361)
 - [EIP-191 Specification](https://eips.ethereum.org/EIPS/eip-191)
