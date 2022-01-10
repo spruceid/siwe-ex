@@ -5,6 +5,8 @@ use iri_string::types::UriString;
 use rustler::{Error, NifResult, NifStruct};
 use siwe::eip4361::{Message, Version};
 use std::str::FromStr;
+use rand::{thread_rng, Rng};
+use rand::distributions::Alphanumeric;
 
 #[derive(NifStruct)]
 #[module = "Siwe"]
@@ -167,6 +169,15 @@ fn parse_if_valid(message: String, sig: String) -> NifResult<Parsed> {
     }
 }
 
+#[rustler::nif]
+fn generate_nonce() -> String {
+    thread_rng()
+    .sample_iter(&Alphanumeric)
+    .take(8)
+    .map(char::from)
+    .collect()
+}
+
 rustler::init!(
     "Elixir.Siwe",
     [
@@ -177,6 +188,7 @@ rustler::init!(
         validate,
         parse_if_valid_sig,
         parse_if_valid_time,
-        parse_if_valid
+        parse_if_valid,
+        generate_nonce
     ]
 );

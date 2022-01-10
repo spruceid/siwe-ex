@@ -145,4 +145,12 @@ defmodule Siwe do
   def parse_if_valid!(message, signature) do
     parse_if_valid(message, signature)
   end
+
+  @doc """
+  Generates an alphanumeric nonce for use in SIWE messages.
+  """
+  @spec generate_nonce() :: String.t()
+  def generate_nonce() do
+    :erlang.nif_error(:nif_not_loaded)
+  end
 end
