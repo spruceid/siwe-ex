@@ -8,7 +8,7 @@ defmodule Siwe.MixProject do
     [
       app: :siwe,
       description: description(),
-      version: "0.2.2",
+      version: "0.2.3",
       organization: "Spruce Systems Inc",
       package: package(),
       elixir: "~> 1.13",
