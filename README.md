@@ -130,6 +130,12 @@ A trio of optimized helpers can be used to combine these steps:
 
 - `parse_if_valid!` takes a SIWE message string and a `signature` then returns a parsed `Message` only if the `signature` matches and the current time is after the `Message`'s `not_before` field (if it exists) and before the `Message`'s `expiration_time` field (if it exists). 
 
+## Disclaimer 
+
+Our Elixir library for Sign-In with Ethereum has not yet undergone a formal security 
+audit. We welcome continued feedback on the usability, architecture, and security 
+of this implementation.
+
 ## See Also
 
 - [Sign-In with Ethereum: TypeScript](https://github.com/spruceid/siwe)
