@@ -2,11 +2,11 @@ use ethers_core::{types::H160, utils::to_checksum};
 use hex::FromHex;
 use http::uri::Authority;
 use iri_string::types::UriString;
-use rustler::{Error, NifResult, NifStruct};
+use rand::distributions::Alphanumeric;
+use rand::{thread_rng, Rng};
+use rustler::NifStruct;
 use siwe::eip4361::{Message, Version};
 use std::str::FromStr;
-use rand::{thread_rng, Rng};
-use rand::distributions::Alphanumeric;
 
 #[derive(NifStruct)]
 #[module = "Siwe"]
@@ -26,20 +26,24 @@ pub struct Parsed {
 }
 
 impl Parsed {
-    pub fn to_eip4361_message(&self) -> NifResult<Message> {
+    pub fn to_eip4361_message(&self) -> Result<Message, String> {
         let mut next_resources: Vec<UriString> = Vec::new();
         for resource in &self.resources {
-            let x = UriString::from_str(resource).map_err(|_e| Error::BadArg)?;
+            let x = UriString::from_str(resource)
+                .map_err(|e| format!("Failed to parse resource: {}", e.to_string()))?;
             next_resources.push(x);
         }
 
         Ok(Message {
-            domain: Authority::from_str(&self.domain).map_err(|_e| Error::BadArg)?,
+            domain: Authority::from_str(&self.domain)
+                .map_err(|e| format!("Bad domain: {}", e.to_string()))?,
             address: <[u8; 20]>::from_hex(self.address.chars().skip(2).collect::<String>())
-                .map_err(|_e| Error::BadArg)?,
+                .map_err(|e| format!("Bad address: {}", e.to_string()))?,
             statement: self.statement.to_string(),
-            uri: UriString::from_str(&self.uri).map_err(|_e| Error::BadArg)?,
-            version: Version::from_str(&self.version).map_err(|_e| Error::BadArg)?,
+            uri: UriString::from_str(&self.uri)
+                .map_err(|e| format!("Bad uri: {}", e.to_string()))?,
+            version: Version::from_str(&self.version)
+                .map_err(|e| format!("Bad version: {}", e.to_string()))?,
             chain_id: self.chain_id.to_string(),
             nonce: self.nonce.to_string(),
             issued_at: self.issued_at.to_string(),
@@ -75,17 +79,17 @@ fn message_to_parsed(m: Message) -> Parsed {
 }
 
 #[rustler::nif]
-fn from_str(message: String) -> NifResult<Parsed> {
+fn parse(message: String) -> Result<Parsed, String> {
     Ok(message_to_parsed(
-        Message::from_str(&message).map_err(|_e| Error::BadArg)?,
+        Message::from_str(&message).map_err(|e| format!("Failed to parse: {}", e))?,
     ))
 }
 
 #[rustler::nif]
-fn to_str(message: Parsed) -> NifResult<String> {
+fn to_str(message: Parsed) -> Result<String, String> {
     Ok(message
         .to_eip4361_message()
-        .map_err(|_e| Error::BadArg)?
+        .map_err(|e| format!("Failed to marshal to string: {}", e))?
         .to_string())
 }
 
@@ -99,14 +103,6 @@ fn validate_sig(message: Parsed, sig: String) -> bool {
             },
             Err(_) => false,
         },
-        Err(_) => false,
-    }
-}
-
-#[rustler::nif]
-fn validate_time(message: Parsed) -> bool {
-    match message.to_eip4361_message() {
-        Ok(m) => m.valid_now(),
         Err(_) => false,
     }
 }
@@ -126,45 +122,22 @@ fn validate(message: Parsed, sig: String) -> bool {
 }
 
 #[rustler::nif]
-fn parse_if_valid_time(message: String) -> NifResult<Parsed> {
-    match Message::from_str(&message) {
-        Err(_) => Err(Error::BadArg),
-        Ok(m) => {
-            if m.valid_now() {
-                Ok(message_to_parsed(m))
-            } else {
-                Err(Error::BadArg)
-            }
-        }
-    }
-}
-
-#[rustler::nif]
-fn parse_if_valid_sig(message: String, sig: String) -> NifResult<Parsed> {
+fn parse_if_valid(message: String, sig: String) -> Result<Parsed, String> {
     let s = <[u8; 65]>::from_hex(sig.chars().skip(2).collect::<String>())
-        .map_err(|_e| Error::BadArg)?;
-    let m = Message::from_str(&message).map_err(|_e| Error::BadArg)?;
-    m.verify_eip191(&s).map_err(|_e| Error::BadArg)?;
+        .map_err(|e| format!("Failed to convert sig to bytes: {}", e))?;
 
-    Ok(message_to_parsed(m))
-}
-
-#[rustler::nif]
-fn parse_if_valid(message: String, sig: String) -> NifResult<Parsed> {
-    let s = <[u8; 65]>::from_hex(sig.chars().skip(2).collect::<String>())
-        .map_err(|_e| Error::BadArg)?;
     match Message::from_str(&message) {
-        Err(_) => Err(Error::BadArg),
+        Err(e) => Err(e.to_string()),
         Ok(m) => match m.verify_eip191(&s) {
             Ok(_) => {
                 if m.valid_now() {
                     Ok(message_to_parsed(m))
                 } else {
-                    Err(Error::BadArg)
+                    Err("Invalid time".to_string())
                 }
             }
 
-            Err(_) => Err(Error::BadArg),
+            Err(e) => Err(e.to_string()),
         },
     }
 }
@@ -172,22 +145,19 @@ fn parse_if_valid(message: String, sig: String) -> NifResult<Parsed> {
 #[rustler::nif]
 fn generate_nonce() -> String {
     thread_rng()
-    .sample_iter(&Alphanumeric)
-    .take(8)
-    .map(char::from)
-    .collect()
+        .sample_iter(&Alphanumeric)
+        .take(11)
+        .map(char::from)
+        .collect()
 }
 
 rustler::init!(
     "Elixir.Siwe",
     [
-        from_str,
+        parse,
         to_str,
         validate_sig,
-        validate_time,
         validate,
-        parse_if_valid_sig,
-        parse_if_valid_time,
         parse_if_valid,
         generate_nonce
     ]

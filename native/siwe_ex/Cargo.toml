@@ -16,4 +16,4 @@ http = "0.2.5"
 iri-string = { version = "0.4", features = ["serde-std"] }
 rand = "0.8.4"
 rustler = "0.22.2"
-siwe = "0.1.2"
+siwe = "0.1.3"
