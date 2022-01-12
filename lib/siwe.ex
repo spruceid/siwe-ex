@@ -5,7 +5,7 @@ defmodule Siwe do
 
   use Rustler, otp_app: :siwe, crate: "siwe_ex"
 
-  # The result of the Siwe.verify!, a formatted form
+  # The result of the Siwe.parse and parse_if_valid, a formatted form
   # of what siwe-rs uses
   defmodule Message do
     defstruct domain: "",
@@ -25,109 +25,57 @@ defmodule Siwe do
               resources: []
   end
 
-  # Overwritten by the Rustler NIF, uses siwe-rs to do the heavy lifting.
-  @doc false
-  @spec from_str(String.t()) :: Message.t()
-  defp from_str(_msg) do
-    :erlang.nif_error(:nif_not_loaded)
+  @doc """
+    Parses a Sign In With Ethereum message string into the Message struct, or reports an error
+  """
+  @spec parse(String.t()) :: {:ok | :error, Message.t() | String.t()}
+  def parse(_msg) do
+    {:error, "NIF not loaded"}
   end
 
-  @spec to_str(Message.t()) :: String.t()
-  defp to_str(_msg) do
-    :erlang.nif_error(:nif_not_loaded)
+  @doc """
+    Converts a Message struct to a Sign In With Ethereum message string, or reports an error
+  """
+  @spec to_str(Message.t()) :: {:ok | :error, String.t()}
+  def to_str(_msg) do
+    {:error, "NIF not loaded"}
   end
 
-  # Overwritten by the Rustler NIF, uses siwe-rs to do the heavy lifting.
-  @doc false
+  @doc """
+    Given a Message struct and a signature, returns true if the Message.address
+    signing the Message would produce the signature.
+  """
   @spec validate_sig(Message.t(), String.t()) :: boolean()
   def validate_sig(_msg, _sig) do
     :erlang.nif_error(:nif_not_loaded)
   end
 
-  # Overwritten by the Rustler NIF, uses siwe-rs to do the heavy lifting.
-  @doc false
+  @doc """
+    Returns true if the current time is between the messages' not_before and expiration_time
+  """
   @spec validate_time(Message.t()) :: boolean()
   def validate_time(_msg) do
     :erlang.nif_error(:nif_not_loaded)
   end
 
-  # Overwritten by the Rustler NIF, uses siwe-rs to do the heavy lifting.
-  # Optimized form of validate_sig(m) && validate_time(m)
-  @doc false
+  @doc """
+    Given a Message and signature returns true if:
+    the current time is between the messages' not_before and expiration_time
+    the Message.address signing the Message would produce the signature.
+  """
   @spec validate(Message.t(), String.t()) :: boolean()
   def validate(_msg, _sig) do
     :erlang.nif_error(:nif_not_loaded)
   end
 
-  # Overwritten by the Rustler NIF, uses siwe-rs to do the heavy lifting.
-  # Optimized form of validate_sig(from_str(s))
-  @doc false
-  @spec parse_if_valid_sig(String.t(), String.t()) :: Message.t()
-  defp parse_if_valid_sig(_msg, _sig) do
-    :erlang.nif_error(:nif_not_loaded)
-  end
-
-  # Overwritten by the Rustler NIF, uses siwe-rs to do the heavy lifting.
-  # Optimized form of validate_time(from_str(s))
-  @doc false
-  @spec parse_if_valid_time(String.t()) :: Message.t()
-  defp parse_if_valid_time(_msg) do
-    :erlang.nif_error(:nif_not_loaded)
-  end
-
-  # Overwritten by the Rustler NIF, uses siwe-rs to do the heavy lifting.
-  # Optimized form of validate(from_str(s)) && from_str(s)
-  @doc false
-  @spec parse_if_valid(String.t(), String.t()) :: Message.t()
-  defp parse_if_valid(_msg, _sig) do
-    :erlang.nif_error(:nif_not_loaded)
-  end
-
-  @doc """
-    Parses a SIWE message string into Siwe.Message struct if conforming to standards.
-    Will parse messages without checking for validity.
-  """
-  @spec from_str!(String.t()) :: Message
-  def from_str!(msg) do
-    from_str(msg)
-  end
-
-  @doc """
-    Formats parsed SIWE message into string matching signing material
-  """
-  @spec to_str!(String.t()) :: Message.t()
-  def to_str!(msg) do
-    to_str(msg)
-  end
-
-  @doc """
-    Parses a SIWE message string into a Siwe Message Struct if the given signature matches
-    the message string.
-  """
-  @spec parse_if_valid_sig!(String.t(), String.t()) :: Message.t()
-  def parse_if_valid_sig!(msg, sig) do
-    parse_if_valid_sig(msg, sig)
-  end
-
-  @doc """
-    Parses a SIWE message string into a Siwe Message Struct if the current time is valid in
-    terms of the message string.
-  """
-  @spec parse_if_valid_time!(String.t()) :: Message.t()
-  def parse_if_valid_time!(msg) do
-    parse_if_valid_time(msg)
-  end
-
   @doc """
    Tests that a message and signature pair correspond and that the current
    time is valid (after not_before, and before expiration_time)
-   any validation of other fields to server's expectation are left
-   to the calling application. Just a wrapper around the Rustler NIF
 
    Returns a Message structure based on the passed message
 
    ## Examples
-    iex> Siwe.parse_if_valid!(Enum.join(["login.xyz wants you to sign in with your Ethereum account:",
+    iex> Siwe.parse_if_valid(Enum.join(["login.xyz wants you to sign in with your Ethereum account:",
     ...> "0xfA151B5453CE69ABf60f0dbdE71F6C9C5868800E",
     ...> "",
     ...> "Sign-In With Ethereum Example Statement",
@@ -139,11 +87,11 @@ defmodule Siwe do
     ...> "Issued At: 2021-12-17T00:38:39.834Z",
     ...> ], "\\n"),
     ...> "0x8d1327a1abbdf172875e5be41706c50fc3bede8af363b67aefbb543d6d082fb76a22057d7cb6d668ceba883f7d70ab7f1dc015b76b51d226af9d610fa20360ad1c")
-    %{ __struct__: Siwe, address: "0xfA151B5453CE69ABf60f0dbdE71F6C9C5868800E", chain_id: "1", domain: "login.xyz", expiration_time: nil, issued_at: "2021-12-17T00:38:39.834Z", nonce: "ToTaLLyRanDOM", not_before: nil, request_id: nil, resources: [], statement: "Sign-In With Ethereum Example Statement", uri: "https://login.xyz", version: "1" }
+    {:ok, %{ __struct__: Siwe, address: "0xfA151B5453CE69ABf60f0dbdE71F6C9C5868800E", chain_id: "1", domain: "login.xyz", expiration_time: nil, issued_at: "2021-12-17T00:38:39.834Z", nonce: "ToTaLLyRanDOM", not_before: nil, request_id: nil, resources: [], statement: "Sign-In With Ethereum Example Statement", uri: "https://login.xyz", version: "1" }}
   """
-  @spec parse_if_valid!(String.t(), String.t()) :: Message.t()
-  def parse_if_valid!(message, signature) do
-    parse_if_valid(message, signature)
+  @spec parse_if_valid(String.t(), String.t()) :: {:ok | :error, Message.t() | String.t()}
+  def parse_if_valid(_msg, _sig) do
+    {:error, "NIF not loaded"}
   end
 
   @doc """
