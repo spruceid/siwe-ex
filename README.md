@@ -6,6 +6,12 @@ Full documentation found at <https://hexdocs.pm/siwe>.
 
 This library provides functions for parsing and validating [SIWE](hhttps://eips.ethereum.org/EIPS/eip-4361) message strings and their corresponding signatures.
 
+## Requirements:
+
+Elixir at version `1.10` or higher using OTP 23 or greater. Rustler officially supports the last 3 minor versions of Elixir, which we also suggest for best experience.
+
+A Rust compiler at version `1.56` or higher so that 2021 edition libraries can be compiled.
+
 ## Installation
 
 The package can be installed by adding `siwe` to your list of dependencies in `mix.exs`:

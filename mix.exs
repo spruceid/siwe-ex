@@ -8,10 +8,10 @@ defmodule Siwe.MixProject do
     [
       app: :siwe,
       description: description(),
-      version: "0.3.1",
+      version: "0.3.2",
       organization: "Spruce Systems Inc",
       package: package(),
-      elixir: "~> 1.13",
+      elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
