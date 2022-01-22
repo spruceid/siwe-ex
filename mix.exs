@@ -8,7 +8,7 @@ defmodule Siwe.MixProject do
     [
       app: :siwe,
       description: description(),
-      version: "0.3.2",
+      version: "0.4.0",
       organization: "Spruce Systems Inc",
       package: package(),
       elixir: "~> 1.10",
@@ -40,6 +40,15 @@ defmodule Siwe.MixProject do
 
   defp package() do
     [
+      files: [
+        "mix.exs",
+        "native/siwe_ex/src",
+        "native/siwe_ex/Cargo.toml",
+        "lib",
+        "LICENSE-APACHE",
+        "LICENSE-MIT",
+        "README.md"
+      ],
       licenses: ["MIT", "Apache-2.0"],
       links: %{}
     ]
