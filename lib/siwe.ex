@@ -10,18 +10,19 @@ defmodule Siwe do
   defmodule Message do
     defstruct domain: "",
               address: "",
-              statement: "",
+              # or a string statement.
+              statement: nil,
               uri: "",
               version: "",
               chain_id: "",
               nonce: "",
               issued_at: "",
+              # or a string datetime
               expiration_time: nil,
               # or a string datetime
               not_before: nil,
-              # or a string datetime
-              request_id: nil,
               # or string
+              request_id: nil,
               resources: []
   end
 
@@ -87,7 +88,7 @@ defmodule Siwe do
     ...> "Issued At: 2021-12-17T00:38:39.834Z",
     ...> ], "\\n"),
     ...> "0x8d1327a1abbdf172875e5be41706c50fc3bede8af363b67aefbb543d6d082fb76a22057d7cb6d668ceba883f7d70ab7f1dc015b76b51d226af9d610fa20360ad1c")
-    {:ok, %{ __struct__: Siwe, address: "0xfA151B5453CE69ABf60f0dbdE71F6C9C5868800E", chain_id: "1", domain: "login.xyz", expiration_time: nil, issued_at: "2021-12-17T00:38:39.834Z", nonce: "ToTaLLyRanDOM", not_before: nil, request_id: nil, resources: [], statement: "Sign-In With Ethereum Example Statement", uri: "https://login.xyz", version: "1" }}
+    {:ok, %{ __struct__: Siwe, address: "0xfA151B5453CE69ABf60f0dbdE71F6C9C5868800E", chain_id: 1, domain: "login.xyz", expiration_time: nil, issued_at: "2021-12-17T00:38:39.834Z", nonce: "ToTaLLyRanDOM", not_before: nil, request_id: nil, resources: [], statement: "Sign-In With Ethereum Example Statement", uri: "https://login.xyz", version: "1" }}
   """
   @spec parse_if_valid(String.t(), String.t()) :: {:ok | :error, Message.t() | String.t()}
   def parse_if_valid(_msg, _sig) do

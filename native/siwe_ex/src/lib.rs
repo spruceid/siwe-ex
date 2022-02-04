@@ -5,7 +5,7 @@ use iri_string::types::UriString;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use rustler::NifStruct;
-use siwe::eip4361::{Message, Version};
+use siwe::{Message, TimeStamp, Version};
 use std::str::FromStr;
 
 #[derive(NifStruct)]
@@ -13,10 +13,10 @@ use std::str::FromStr;
 pub struct Parsed {
     pub domain: String,
     pub address: String,
-    pub statement: String,
+    pub statement: Option<String>,
     pub uri: String,
     pub version: String,
-    pub chain_id: String,
+    pub chain_id: u64,
     pub nonce: String,
     pub issued_at: String,
     pub expiration_time: Option<String>,
@@ -39,19 +39,37 @@ impl Parsed {
                 .map_err(|e| format!("Bad domain: {}", e.to_string()))?,
             address: <[u8; 20]>::from_hex(self.address.chars().skip(2).collect::<String>())
                 .map_err(|e| format!("Bad address: {}", e.to_string()))?,
-            statement: self.statement.to_string(),
+            statement: self.statement.clone(),
             uri: UriString::from_str(&self.uri)
                 .map_err(|e| format!("Bad uri: {}", e.to_string()))?,
             version: Version::from_str(&self.version)
                 .map_err(|e| format!("Bad version: {}", e.to_string()))?,
-            chain_id: self.chain_id.to_string(),
+            chain_id: self.chain_id,
             nonce: self.nonce.to_string(),
-            issued_at: self.issued_at.to_string(),
-            expiration_time: self.expiration_time.clone(),
-            not_before: self.not_before.clone(),
+            issued_at: TimeStamp::from_str(&self.issued_at)
+                .map_err(|e| format!("Failed to convert issued at: {}", e))?,
+            expiration_time: to_timestamp(&self.expiration_time),
+            not_before: to_timestamp(&self.not_before),
             request_id: self.request_id.clone(),
             resources: next_resources,
         })
+    }
+}
+
+fn from_timestamp(maybe_timestamp: &Option<TimeStamp>) -> Option<String> {
+    match maybe_timestamp {
+        None => None,
+        Some(t) => Some(t.to_string()),
+    }
+}
+
+fn to_timestamp(maybe_string: &Option<String>) -> Option<TimeStamp> {
+    match maybe_string {
+        None => None,
+        Some(s) => match TimeStamp::from_str(&s) {
+            Err(_) => None,
+            Ok(t) => Some(t),
+        },
     }
 }
 
@@ -70,9 +88,9 @@ fn message_to_parsed(m: Message) -> Parsed {
         version: version_string(m.version),
         chain_id: m.chain_id,
         nonce: m.nonce,
-        issued_at: m.issued_at,
-        expiration_time: m.expiration_time,
-        not_before: m.not_before,
+        issued_at: m.issued_at.to_string(),
+        expiration_time: from_timestamp(&m.expiration_time),
+        not_before: from_timestamp(&m.not_before),
         request_id: m.request_id,
         resources: m.resources.into_iter().map(|s| s.to_string()).collect(),
     }

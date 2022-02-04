@@ -78,7 +78,7 @@ Issued At: 2021-12-17T00:38:39.834Z"
     assert(res.address == "0xfA151B5453CE69ABf60f0dbdE71F6C9C5868800E")
     assert(res.uri == "https://login.xyz")
     assert(res.version == "1")
-    assert(res.chain_id == "1")
+    assert(res.chain_id == 1)
     assert(res.nonce == "ToTaLLyRanDOM")
     assert(res.issued_at == "2021-12-17T00:38:39.834Z")
     assert(res.expiration_time == nil)
