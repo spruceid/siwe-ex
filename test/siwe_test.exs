@@ -2,7 +2,7 @@ defmodule SiweTest do
   use ExUnit.Case
   doctest Siwe
 
-  test "helper functions are equivilant" do
+  test "helper functions are equivalent" do
     good_msg = "login.xyz wants you to sign in with your Ethereum account:
 0xfA151B5453CE69ABf60f0dbdE71F6C9C5868800E
 

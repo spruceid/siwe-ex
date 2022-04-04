@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use ethers_core::{types::H160, utils::to_checksum};
 use hex::FromHex;
 use http::uri::Authority;
@@ -112,13 +113,10 @@ fn to_str(message: Parsed) -> Result<String, String> {
 }
 
 #[rustler::nif]
-fn validate_sig(message: Parsed, sig: String) -> bool {
+fn verify_sig(message: Parsed, sig: String) -> bool {
     match message.to_eip4361_message() {
         Ok(m) => match <[u8; 65]>::from_hex(sig.chars().skip(2).collect::<String>()) {
-            Ok(s) => match m.verify_eip191(&s) {
-                Ok(_) => true,
-                Err(_) => false,
-            },
+            Ok(s) => m.verify_eip191(&s).is_ok(),
             Err(_) => false,
         },
         Err(_) => false,
@@ -126,13 +124,27 @@ fn validate_sig(message: Parsed, sig: String) -> bool {
 }
 
 #[rustler::nif]
-fn validate(message: Parsed, sig: String) -> bool {
+fn verify(
+    message: Parsed,
+    sig: String,
+    domain_binding: Option<String>,
+    match_nonce: Option<String>,
+    timestamp: Option<String>,
+) -> bool {
     match message.to_eip4361_message() {
         Ok(m) => match <[u8; 65]>::from_hex(sig.chars().skip(2).collect::<String>()) {
-            Ok(s) => match m.verify_eip191(&s) {
-                Ok(_) => m.valid_now(),
-                Err(_) => false,
-            },
+            Ok(s) => m
+                .verify(
+                    s,
+                    domain_binding
+                        .and_then(|domain_binding| Authority::from_str(&domain_binding).ok())
+                        .as_ref(),
+                    match_nonce.as_ref().map(|x| x as _),
+                    timestamp
+                        .and_then(|timestamp| DateTime::<Utc>::from_str(&timestamp).ok())
+                        .as_ref(),
+                )
+                .is_ok(),
             Err(_) => false,
         },
         Err(_) => false,
@@ -174,8 +186,8 @@ rustler::init!(
     [
         parse,
         to_str,
-        validate_sig,
-        validate,
+        verify_sig,
+        verify,
         parse_if_valid,
         generate_nonce
     ]
