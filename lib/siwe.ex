@@ -52,14 +52,6 @@ defmodule Siwe do
   end
 
   @doc """
-    Returns true if the current time is between the messages' not_before and expiration_time
-  """
-  @spec verify_time(Message.t()) :: boolean()
-  def verify_time(_msg) do
-    :erlang.nif_error(:nif_not_loaded)
-  end
-
-  @doc """
     Given a Message, signature, and optionally, domain, nonce and timestamp, returns true if:
     the current time or timestamp, if provided, is between the messages' not_before and expiration_time
     the Message.address signing the Message would produce the signature.
