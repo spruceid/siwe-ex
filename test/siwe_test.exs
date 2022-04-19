@@ -3,24 +3,7 @@ defmodule SiweTest do
   doctest Siwe
 
   test "helper functions are equivalent" do
-    good_msg = "login.xyz wants you to sign in with your Ethereum account:
-0xfA151B5453CE69ABf60f0dbdE71F6C9C5868800E
-
-Sign-In With Ethereum Example Statement
-
-URI: https://login.xyz
-Version: 1
-Chain ID: 1
-Nonce: ToTaLLyRanDOM
-Issued At: 2021-12-17T00:38:39.834Z"
-
-    good_sig =
-      "0x8d1327a1abbdf172875e5be41706c50fc3bede8af363b67aefbb543d6d082fb76a22057d7cb6d668ceba883f7d70ab7f1dc015b76b51d226af9d610fa20360ad1c"
-
-    bad_sig =
-      "0x111111a1abbdf172875e5be41706c50fc3bede8af363b67aefbb543d6d082fb76a22057d7cb6d668ceba883f7d70ab7f1dc015b76b51d226af9d610fa20360ad1c"
-
-    expired_msg = "login.xyz wants you to sign in with your Ethereum account:
+    msg = "login.xyz wants you to sign in with your Ethereum account:
 0xfA151B5453CE69ABf60f0dbdE71F6C9C5868800E
 
 Sign-In With Ethereum Example Statement
@@ -32,29 +15,63 @@ Nonce: ToTaLLyRanDOM
 Issued At: 2021-12-16T20:21:39.911Z
 Expiration Time: 2021-12-18T20:21:39.907Z"
 
-    expired_sig =
+    {:ok, res} = Siwe.parse(msg)
+    {:ok, msg_2} = Siwe.to_str(res)
+
+    assert(msg_2 == msg)
+
+    sig =
       "0x30893d6bb4b171e540f0ca705c31f2431bdb4e5c712b6e2eb0c87ed6fbfb87e14f1a90da08473bf1e084a41311c0fd2174a676eb53301f9d4703824b5bc2e1b21c"
 
-    {:ok, good_res} = Siwe.parse_if_valid(good_msg, good_sig)
-    {:ok, good_msg_2} = Siwe.to_str(good_res)
+    bad_sig =
+      "0x111111a1abbdf172875e5be41706c50fc3bede8af363b67aefbb543d6d082fb76a22057d7cb6d668ceba883f7d70ab7f1dc015b76b51d226af9d610fa20360ad1c"
 
-    assert(good_msg_2 == good_msg)
+    assert(Siwe.verify_sig(res, sig))
+    assert(!Siwe.verify_sig(res, bad_sig))
+    assert(Siwe.verify(res, sig, struct(Siwe.Opts)))
+    # assert(!Siwe.verify(res, bad_sig, struct(Siwe.Opts)))
+    assert(Siwe.verify(res, sig, struct(Siwe.Opts, domain_binding: "login.xyz")))
+    assert(Siwe.verify(res, sig, struct(Siwe.Opts, domain_binding: "login.abc")))
 
-    assert(Siwe.validate_sig(good_res, good_sig))
-    assert(Siwe.validate(good_res, good_sig))
+    assert(
+      Siwe.verify(
+        res,
+        sig,
+        struct(Siwe.Opts, domain_binding: "login.xyz", match_nonce: "ToTaLLyRanDOM")
+      )
+    )
 
-    assert(!Siwe.validate_sig(good_res, bad_sig))
-    assert(!Siwe.validate(good_res, bad_sig))
+    assert(
+      Siwe.verify(
+        res,
+        sig,
+        struct(Siwe.Opts, domain_binding: "login.xyz", match_nonce: "totallyrandom")
+      )
+    )
 
-    {:ok, expired_res} = Siwe.parse(expired_msg)
-    {:ok, expired_msg_2} = Siwe.to_str(expired_res)
+    assert(
+      Siwe.verify(
+        res,
+        sig,
+        struct(Siwe.Opts,
+          domain_binding: "login.xyz",
+          match_nonce: "totallyrandom",
+          timestamp: "2021-12-16T20:22:39.911Z"
+        )
+      )
+    )
 
-    assert(expired_msg_2 == expired_msg)
-    assert(Siwe.validate_sig(expired_res, expired_sig))
-
-    assert(!Siwe.validate(expired_res, expired_sig))
-
-    {:error, _} = Siwe.parse_if_valid(expired_msg, expired_sig)
+    assert(
+      Siwe.verify(
+        res,
+        sig,
+        struct(Siwe.Opts,
+          domain_binding: "login.xyz",
+          match_nonce: "totallyrandom",
+          timestamp: "2021-12-19T20:22:39.911Z"
+        )
+      )
+    )
   end
 
   # TODO: Add test for time using on-fly-generated message and sig, requiring local key to test?

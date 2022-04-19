@@ -18,3 +18,4 @@ rand = "0.8.4"
 rustler = "0.22.2"
 chrono = "0.4"
 siwe = { path = "../../../siwe-rs" }
+# siwe = "0.2"

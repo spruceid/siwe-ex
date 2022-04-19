@@ -26,6 +26,14 @@ pub struct Parsed {
     pub resources: Vec<String>,
 }
 
+#[derive(NifStruct)]
+#[module = "Siwe"]
+pub struct Opts {
+    pub domain_binding: Option<String>,
+    pub match_nonce: Option<String>,
+    pub timestamp: Option<String>,
+}
+
 impl Parsed {
     pub fn to_eip4361_message(&self) -> Result<Message, String> {
         let mut next_resources: Vec<UriString> = Vec::new();
@@ -124,23 +132,17 @@ fn verify_sig(message: Parsed, sig: String) -> bool {
 }
 
 #[rustler::nif]
-fn verify(
-    message: Parsed,
-    sig: String,
-    domain_binding: Option<String>,
-    match_nonce: Option<String>,
-    timestamp: Option<String>,
-) -> bool {
+fn verify(message: Parsed, sig: String, opts: Opts) -> bool {
     match message.to_eip4361_message() {
         Ok(m) => match <[u8; 65]>::from_hex(sig.chars().skip(2).collect::<String>()) {
             Ok(s) => m
                 .verify(
                     s,
-                    domain_binding
+                    opts.domain_binding
                         .and_then(|domain_binding| Authority::from_str(&domain_binding).ok())
                         .as_ref(),
-                    match_nonce.as_ref().map(|x| x as _),
-                    timestamp
+                    opts.match_nonce.as_ref().map(|x| x as _),
+                    opts.timestamp
                         .and_then(|timestamp| DateTime::<Utc>::from_str(&timestamp).ok())
                         .as_ref(),
                 )

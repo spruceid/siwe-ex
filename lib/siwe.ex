@@ -26,6 +26,12 @@ defmodule Siwe do
               resources: []
   end
 
+  defmodule Opts do
+    defstruct domain_binding: nil,
+              matching_nonce: nil,
+              timestamp: nil
+  end
+
   @doc """
     Parses a Sign In With Ethereum message string into the Message struct, or reports an error
   """
@@ -58,8 +64,8 @@ defmodule Siwe do
     the domain, if provided, matches Message.domain
     the nonce, if provided, matches Message.nonce
   """
-  @spec verify(Message.t(), String.t(), String.t(), String.t(), String.t()) :: boolean()
-  def verify(_msg, _sig, _domain_binding, _match_nonce, _timestamp) do
+  @spec verify(Message.t(), String.t(), Opts.t()) :: boolean()
+  def verify(_msg, _sig, _opts) do
     :erlang.nif_error(:nif_not_loaded)
   end
 
