@@ -115,19 +115,15 @@ iex> str2 == String.trim(msg)
 
 Once parsed, the `Message` can be verified. 
 
-- `verify_time` returns true if current time is after the `Message`'s `not_before` field (if it exists) and before the `Message`'s `expiration_time` field (if it exists). 
-
 - `verify_sig` takes the `Message` and a corresponding `signature` and returns true if the `Message`'s `address` field would produce the `signature` if it had signed the `Message`'s string form.
 
-- `verify` returns true only if both `verify_time` and `verify_sig` would. Three optional string parameters can be passed to `verify`:
+- `verify` returns true if `verify_sig` would and current time is after the `Message`'s `not_before` field (if it exists) and before the `Message`'s `expiration_time` field (if it exists). Three optional string parameters can be passed to `verify`:
      - `domain_binding`, which Message.domain must match to pass verification
      - `match_nonce`, which Message.nonce must match to pass verification
      - `timestamp`, which will instead verify the message at that point in time
 
 ```
 iex> Siwe.verify_sig(parsed, String.trim(sig))
-:true
-iex> Siwe.verify_time(parsed)
 :true
 iex> Siwe.verify(parsed, String.trim(sig), "login.xyz", nil, nil)
 :true
