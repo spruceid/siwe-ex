@@ -29,9 +29,9 @@ Expiration Time: 2021-12-18T20:21:39.907Z"
     assert(Siwe.verify_sig(res, sig))
     assert(!Siwe.verify_sig(res, bad_sig))
     assert(Siwe.verify(res, sig, struct(Siwe.Opts)))
-    # assert(!Siwe.verify(res, bad_sig, struct(Siwe.Opts)))
+    assert(!Siwe.verify(res, bad_sig, struct(Siwe.Opts)))
     assert(Siwe.verify(res, sig, struct(Siwe.Opts, domain_binding: "login.xyz")))
-    assert(Siwe.verify(res, sig, struct(Siwe.Opts, domain_binding: "login.abc")))
+    assert(!Siwe.verify(res, sig, struct(Siwe.Opts, domain_binding: "login.abc")))
 
     assert(
       Siwe.verify(
@@ -42,7 +42,7 @@ Expiration Time: 2021-12-18T20:21:39.907Z"
     )
 
     assert(
-      Siwe.verify(
+      !Siwe.verify(
         res,
         sig,
         struct(Siwe.Opts, domain_binding: "login.xyz", match_nonce: "totallyrandom")
@@ -55,14 +55,14 @@ Expiration Time: 2021-12-18T20:21:39.907Z"
         sig,
         struct(Siwe.Opts,
           domain_binding: "login.xyz",
-          match_nonce: "totallyrandom",
+          match_nonce: "ToTaLLyRanDOM",
           timestamp: "2021-12-16T20:22:39.911Z"
         )
       )
     )
 
     assert(
-      Siwe.verify(
+      !Siwe.verify(
         res,
         sig,
         struct(Siwe.Opts,
