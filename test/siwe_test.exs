@@ -26,52 +26,24 @@ Expiration Time: 2021-12-18T20:21:39.907Z"
     bad_sig =
       "0x111111a1abbdf172875e5be41706c50fc3bede8af363b67aefbb543d6d082fb76a22057d7cb6d668ceba883f7d70ab7f1dc015b76b51d226af9d610fa20360ad1c"
 
-    assert(Siwe.verify_sig(res, sig))
-    assert(!Siwe.verify_sig(res, bad_sig))
-    assert(Siwe.verify(res, sig, struct(Siwe.Opts)))
-    assert(!Siwe.verify(res, bad_sig, struct(Siwe.Opts)))
-    assert(Siwe.verify(res, sig, struct(Siwe.Opts, domain_binding: "login.xyz")))
-    assert(!Siwe.verify(res, sig, struct(Siwe.Opts, domain_binding: "login.abc")))
-
-    assert(
-      Siwe.verify(
-        res,
-        sig,
-        struct(Siwe.Opts, domain_binding: "login.xyz", match_nonce: "ToTaLLyRanDOM")
-      )
-    )
-
-    assert(
-      !Siwe.verify(
-        res,
-        sig,
-        struct(Siwe.Opts, domain_binding: "login.xyz", match_nonce: "totallyrandom")
-      )
-    )
-
-    assert(
-      Siwe.verify(
-        res,
-        sig,
-        struct(Siwe.Opts,
-          domain_binding: "login.xyz",
-          match_nonce: "ToTaLLyRanDOM",
-          timestamp: "2021-12-16T20:22:39.911Z"
-        )
-      )
-    )
-
-    assert(
-      !Siwe.verify(
-        res,
-        sig,
-        struct(Siwe.Opts,
-          domain_binding: "login.xyz",
-          match_nonce: "totallyrandom",
-          timestamp: "2021-12-19T20:22:39.911Z"
-        )
-      )
-    )
+    assert(Siwe.verify_sig(res, sig) == true)
+    assert(!Siwe.verify_sig(res, bad_sig) == true)
+    # fail on current time
+    assert(!Siwe.verify(res, sig, nil, nil, nil) == true)
+    # succeed with valid time
+    assert(Siwe.verify(res, sig, nil, nil, "2021-12-16T20:22:39.911Z") == true)
+    # fail with bad sig
+    assert(!Siwe.verify(res, bad_sig, nil, nil, "2021-12-16T20:22:39.911Z") == true)
+    # succeed with valid domain
+    assert(Siwe.verify(res, sig, "login.xyz", nil, "2021-12-16T20:22:39.911Z") == true)
+    # fail with invalid domain
+    assert(!Siwe.verify(res, sig, "login.abc", nil, "2021-12-16T20:22:39.911Z") == true)
+    # succeed with valid nonce
+    assert(Siwe.verify(res, sig, nil, "ToTaLLyRanDOM", "2021-12-16T20:22:39.911Z") == true)
+    # fail with invalid nonce
+    assert(!Siwe.verify(res, sig, nil, "totallyrandom", "2021-12-16T20:22:39.911Z") == true)
+    # succeed with all
+    assert(Siwe.verify(res, sig, "login.xyz", "ToTaLLyRanDOM", "2021-12-16T20:22:39.911Z") == true)
   end
 
   # TODO: Add test for time using on-fly-generated message and sig, requiring local key to test?
