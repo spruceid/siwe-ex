@@ -32,6 +32,8 @@ Expiration Time: 2021-12-18T20:21:39.907Z"
     assert(!Siwe.verify(res, sig, nil, nil, nil) == true)
     # succeed with valid time
     assert(Siwe.verify(res, sig, nil, nil, "2021-12-16T20:22:39.911Z") == true)
+    # fail with invalid time
+    assert(!Siwe.verify(res, sig, nil, nil, "2021-12-19T20:22:39.911Z") == true)
     # fail with bad sig
     assert(!Siwe.verify(res, bad_sig, nil, nil, "2021-12-16T20:22:39.911Z") == true)
     # succeed with valid domain
