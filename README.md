@@ -113,20 +113,25 @@ iex> str2 == String.trim(msg)
 :true
 ```
 
-Once parsed, the `Message` can be validated. 
+Once parsed, the `Message` can be verified. 
 
-- `validate_time` returns true if current time is after the `Message`'s `not_before` field (if it exists) and before the `Message`'s `expiration_time` field (if it exists). 
+- `verify_sig` takes the `Message` and a corresponding `signature` and returns true if the `Message`'s `address` field would produce the `signature` if it had signed the `Message`'s string form.
 
-- `validate_sig` takes the `Message` and a corresponding `signature` and returns true if the `Message`'s `address` field would produce the `signature` if it had signed the `Message`'s string form.
-
-- `validate` returns true only if both `validate_time` and `validate_sig` would.
+- `verify` returns true if `verify_sig` would and current time is after the `Message`'s `not_before` field (if it exists) and before the `Message`'s `expiration_time` field (if it exists). Three optional string parameters can be passed to `verify`:
+     - `domain_binding`, which Message.domain must match to pass verification
+     - `match_nonce`, which Message.nonce must match to pass verification
+     - `timestamp`, which will instead verify the message at that point in time
 
 ```
-iex> Siwe.validate_sig(parsed, String.trim(sig))
+iex> Siwe.verify_sig(parsed, String.trim(sig))
 :true
-iex> Siwe.validate_time(parsed)
+iex> Siwe.verify(parsed, String.trim(sig), "login.xyz", nil, nil)
 :true
-iex> Siwe.validate(parsed, String.trim(sig))
+iex> Siwe.verify(parsed, String.trim(sig), nil, "12341234", nil)
+:true
+iex> Siwe.verify(parsed, String.trim(sig), nil, nil, "2021-04-04T00:38:39.834Z")
+:true
+iex> Siwe.verify(parsed, String.trim(sig), nil, nil, nil)
 :true
 ```
 

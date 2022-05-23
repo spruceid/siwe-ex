@@ -46,26 +46,20 @@ defmodule Siwe do
     Given a Message struct and a signature, returns true if the Message.address
     signing the Message would produce the signature.
   """
-  @spec validate_sig(Message.t(), String.t()) :: boolean()
-  def validate_sig(_msg, _sig) do
+  @spec verify_sig(Message.t(), String.t()) :: boolean()
+  def verify_sig(_msg, _sig) do
     :erlang.nif_error(:nif_not_loaded)
   end
 
   @doc """
-    Returns true if the current time is between the messages' not_before and expiration_time
-  """
-  @spec validate_time(Message.t()) :: boolean()
-  def validate_time(_msg) do
-    :erlang.nif_error(:nif_not_loaded)
-  end
-
-  @doc """
-    Given a Message and signature returns true if:
-    the current time is between the messages' not_before and expiration_time
+    Given a Message, signature, and optionally, domain, nonce and timestamp, returns true if:
+    the current time or timestamp, if provided, is between the messages' not_before and expiration_time
     the Message.address signing the Message would produce the signature.
+    the domain, if provided, matches Message.domain
+    the nonce, if provided, matches Message.nonce
   """
-  @spec validate(Message.t(), String.t()) :: boolean()
-  def validate(_msg, _sig) do
+  @spec verify(Message.t(), String.t(), String.t() | nil.t(), String.t() | nil.t(), String.t() | nil.t()) :: boolean()
+  def verify(_msg, _sig, _domain_binding, _match_nonce, _timestamp) do
     :erlang.nif_error(:nif_not_loaded)
   end
 
