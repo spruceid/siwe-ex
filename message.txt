@@ -1,0 +1,10 @@
+login.xyz wants you to sign in with your Ethereum account:
+0xfA151B5453CE69ABf60f0dbdE71F6C9C5868800E
+
+Sign-In With Ethereum Example Statement
+
+URI: https://login.xyz
+Version: 1
+Chain ID: 1
+Nonce: ToTaLLyRanDOM
+Issued At: 2021-12-17T00:38:39.834Z
