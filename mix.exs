@@ -27,7 +27,7 @@ defmodule Siwe.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:rustler, "~> 0.22.2"},
+      {:rustler, "~> 0.30.0"},
       # NOTE: For M1 compat:
       # {:rustler, git: "https://github.com/rusterlium/rustler.git", sparse: "rustler_mix"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
