@@ -10,7 +10,7 @@ use siwe::{Message, TimeStamp, Version};
 use std::str::FromStr;
 
 #[derive(NifStruct)]
-#[module = "Siwe"]
+#[module = "Siwe.Message"]
 pub struct Parsed {
     pub domain: String,
     pub address: String,
@@ -182,7 +182,7 @@ fn generate_nonce() -> String {
 }
 
 rustler::init!(
-    "Elixir.Siwe",
+    "Elixir.Siwe.Native",
     [
         parse,
         to_str,

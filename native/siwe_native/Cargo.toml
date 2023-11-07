@@ -1,11 +1,11 @@
 [package]
-name = "siwe_ex"
+name = "siwe_native"
 version = "0.1.0"
 authors = []
-edition = "2018"
+edition = "2021"
 
 [lib]
-name = "siwe_ex"
+name = "siwe_native"
 path = "src/lib.rs"
 crate-type = ["cdylib"]
 
@@ -15,6 +15,6 @@ hex = "0.4.3"
 http = "0.2.5"
 iri-string = { version = "0.4", features = ["serde-std"] }
 rand = "0.8.4"
-rustler = "0.22.2"
+rustler = "0.30"
 chrono = "0.4"
 siwe = "0.3"
