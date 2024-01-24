@@ -8,6 +8,8 @@ defmodule Siwe do
   # The result of the Siwe.parse and parse_if_valid, a formatted form
   # of what siwe-rs uses
   defmodule Message do
+    @type t :: %__MODULE__{}
+
     defstruct domain: "",
               address: "",
               # or a string statement.
@@ -58,7 +60,7 @@ defmodule Siwe do
     the domain, if provided, matches Message.domain
     the nonce, if provided, matches Message.nonce
   """
-  @spec verify(Message.t(), String.t(), String.t() | nil.t(), String.t() | nil.t(), String.t() | nil.t()) :: boolean()
+  @spec verify(Message.t(), String.t(), String.t() | nil, String.t() | nil, String.t() | nil) :: boolean()
   def verify(_msg, _sig, _domain_binding, _match_nonce, _timestamp) do
     :erlang.nif_error(:nif_not_loaded)
   end
