@@ -166,3 +166,11 @@ of this implementation.
 - [Example SIWE application: login.xyz](https://login.xyz)
 - [EIP-4361 Specification](https://eips.ethereum.org/EIPS/eip-4361)
 - [EIP-191 Specification](https://eips.ethereum.org/EIPS/eip-191)
+
+### Releasing
+
+1. release a new tag: `git tag v0.x.0`
+1. push the code to your repository with the new tag: `git push origin main --tags`
+1. wait for all NIFs to be built
+1. run `mix rustler_precompiled.download Siwe.Native --all`
+1. release the package to `hex.pm` (make sure your release includes the correct files).
