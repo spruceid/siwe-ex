@@ -1,56 +1,51 @@
 defmodule Siwe.MixProject do
   use Mix.Project
 
-  # TODO: Add :links to docs!
-  # TODO: Add :source_url to github!
-  # TODO: Add :homepage_url to devportal!
+  @description "Elixir library to parse and validate Sign In with Ethereum Messages"
+  @organization "Spruce Systems, Inc."
+  @source_url "https://github.com/spruceid/siwe-ex"
+  @version "0.6.0"
+
+  def application, do: [extra_applications: [:logger]]
+
   def project do
     [
       app: :siwe,
-      description: description(),
-      version: "0.5.0",
-      organization: "Spruce Systems Inc",
-      package: package(),
-      elixir: "~> 1.10",
-      start_permanent: Mix.env() == :prod,
-      deps: deps()
-    ]
-  end
-
-  # Run "mix help compile.app" to learn about applications.
-  def application do
-    [
-      extra_applications: [:logger]
-    ]
-  end
-
-  # Run "mix help deps" to learn about dependencies.
-  defp deps do
-    [
-      {:rustler, "~> 0.22.2"},
-      # NOTE: For M1 compat:
-      # {:rustler, git: "https://github.com/rusterlium/rustler.git", sparse: "rustler_mix"},
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
-    ]
-  end
-
-  defp description() do
-    "Elixir library to parse and validate Sign In with Ethereum Messages"
-  end
-
-  defp package() do
-    [
-      files: [
-        "mix.exs",
-        "native/siwe_ex/src",
-        "native/siwe_ex/Cargo.toml",
-        "lib",
-        "LICENSE-APACHE",
-        "LICENSE-MIT",
-        "README.md"
+      deps: [
+        {:rustler, "~> 0.30", optional: true},
+        {:rustler_precompiled, "~> 0.7"},
+        {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
       ],
-      licenses: ["MIT", "Apache-2.0"],
-      links: %{}
+      description: @description,
+      docs: [
+        main: "readme",
+        extras: ["README.md"],
+        source_url_pattern: "#{@source_url}/blob/v#{@version}/%{path}#L%{line}"
+      ],
+      elixir: "~> 1.10",
+      organization: @organization,
+      package: [
+        exclude_patterns: [
+          ~r/\W\.DS_Store$/,
+          ~r/target/
+        ],
+        files: [
+          "LICENSE-APACHE",
+          "LICENSE-MIT",
+          "README.md",
+          "lib",
+          "native/siwe_native/.cargo",
+          "native/siwe_native/src",
+          "native/siwe_native/Cargo*",
+          "checksum-*.exs",
+          "mix.exs"
+        ],
+        licenses: ["MIT", "Apache-2.0"],
+        links: %{"GitHub" => @source_url},
+        maintainers: [@organization]
+      ],
+      start_permanent: Mix.env() == :prod,
+      version: @version
     ]
   end
 end

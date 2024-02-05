@@ -1,10 +1,10 @@
-# Sign-In with Ethereum 
+# Sign-In with Ethereum
 
 Elixir library to enable [Sign-In with Ethereum](https://login.xyz) message validation.
 
 Full documentation found at <https://hexdocs.pm/siwe>.
 
-This library provides functions for parsing and validating [SIWE](hhttps://eips.ethereum.org/EIPS/eip-4361) message strings and their corresponding signatures.
+This library provides functions for parsing and validating [SIWE](https://eips.ethereum.org/EIPS/eip-4361) message strings and their corresponding signatures.
 
 ## Requirements:
 
@@ -23,15 +23,18 @@ def deps do
   ]
 end
 ```
+
 ## Example
 
 To see how this works in `iex`, clone this repository and from the root run:
+
 ```bash
 $ mix deps.get
 ```
 
 Then create two files
 `message.txt`:
+
 ```
 login.xyz wants you to sign in with your Ethereum account:
 0xfA151B5453CE69ABf60f0dbdE71F6C9C5868800E
@@ -46,22 +49,26 @@ Issued At: 2021-12-17T00:38:39.834Z
 ```
 
 `signature.txt`:
+
 ```
 0x8d1327a1abbdf172875e5be41706c50fc3bede8af363b67aefbb543d6d082fb76a22057d7cb6d668ceba883f7d70ab7f1dc015b76b51d226af9d610fa20360ad1c
 ```
-then run 
+
+then run
+
 ```
 $ iex -S mix
 ```
+
 Once in iex, you can then run the following to see the result:
+
 ```
 iex> {:ok, msg} = File.read("./message.txt")
 ...
 iex> {:ok, sig} = File.read("./signature.txt")
 ...
 iex> Siwe.parse_if_valid(String.trim(msg), String.trim(sig))
-{:ok, %{
-  __struct__: Siwe,
+{:ok, %Siwe.Message{
   address: "0xfA151B5453CE69ABf60f0dbdE71F6C9C5868800E",
   chain_id: "1",
   domain: "login.xyz",
@@ -80,11 +87,12 @@ iex> Siwe.parse_if_valid(String.trim(msg), String.trim(sig))
 Any valid SIWE message and signature pair can be substituted.The functions described below can also be tested with `msg`, `sig`, or a value set to the result `Siwe.parse_if_valid`.
 
 ## API Overview
+
 This library deals with three different types of input:
 
-1) SIWE message strings.
-2) Signatures of SIWE message strings.
-3) A parsed SIWE message which is defined as:
+1. SIWE message strings.
+2. Signatures of SIWE message strings.
+3. A parsed SIWE message which is defined as:
 
 ```elixir
   defmodule Message do
@@ -108,19 +116,19 @@ The most basic functions are `parse` and `to_str` which translate a SIWE message
 ```
 iex> {:ok, parsed} = Siwe.parse(String.trim(msg))
 ...
-iex> {:ok, str2} = Siwe.to_str(parsed) 
+iex> {:ok, str2} = Siwe.to_str(parsed)
 iex> str2 == String.trim(msg)
 :true
 ```
 
-Once parsed, the `Message` can be verified. 
+Once parsed, the `Message` can be verified.
 
 - `verify_sig` takes the `Message` and a corresponding `signature` and returns true if the `Message`'s `address` field would produce the `signature` if it had signed the `Message`'s string form.
 
 - `verify` returns true if `verify_sig` would and current time is after the `Message`'s `not_before` field (if it exists) and before the `Message`'s `expiration_time` field (if it exists). Three optional string parameters can be passed to `verify`:
-     - `domain_binding`, which Message.domain must match to pass verification
-     - `match_nonce`, which Message.nonce must match to pass verification
-     - `timestamp`, which will instead verify the message at that point in time
+  - `domain_binding`, which Message.domain must match to pass verification
+  - `match_nonce`, which Message.nonce must match to pass verification
+  - `timestamp`, which will instead verify the message at that point in time
 
 ```
 iex> Siwe.verify_sig(parsed, String.trim(sig))
@@ -135,7 +143,7 @@ iex> Siwe.verify(parsed, String.trim(sig), nil, nil, nil)
 :true
 ```
 
-`parse_if_valid` is an optimized helper function which takes a SIWE message string and a `signature` then returns a parsed `Message` only if the `signature` matches and the current time is after the `Message`'s `not_before` field (if it exists) and before the `Message`'s `expiration_time` field (if it exists). 
+`parse_if_valid` is an optimized helper function which takes a SIWE message string and a `signature` then returns a parsed `Message` only if the `signature` matches and the current time is after the `Message`'s `not_before` field (if it exists) and before the `Message`'s `expiration_time` field (if it exists).
 
 ```
 iex> Siwe.generate_nonce()
@@ -144,10 +152,11 @@ iex> Siwe.generate_nonce()
 
 Another helper, `generate_nonce` function is provided to create alphanumeric [a-z, A-Z, 1-9] nonces compliant with SIWE's spec, used like so:
 This is useful for servers using SIWE for their own authentication systems.
-## Disclaimer 
 
-Our Elixir library for Sign-In with Ethereum has not yet undergone a formal security 
-audit. We welcome continued feedback on the usability, architecture, and security 
+## Disclaimer
+
+Our Elixir library for Sign-In with Ethereum has not yet undergone a formal security
+audit. We welcome continued feedback on the usability, architecture, and security
 of this implementation.
 
 ## See Also
@@ -157,3 +166,11 @@ of this implementation.
 - [Example SIWE application: login.xyz](https://login.xyz)
 - [EIP-4361 Specification](https://eips.ethereum.org/EIPS/eip-4361)
 - [EIP-191 Specification](https://eips.ethereum.org/EIPS/eip-191)
+
+### Releasing
+
+1. release a new tag: `git tag v0.x.0`
+1. push the code to your repository with the new tag: `git push origin main --tags`
+1. wait for all NIFs to be built
+1. run `mix rustler_precompiled.download Siwe.Native --all`
+1. release the package to `hex.pm` (make sure your release includes the correct files).

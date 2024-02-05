@@ -45,7 +45,9 @@ Expiration Time: 2021-12-18T20:21:39.907Z"
     # fail with invalid nonce
     assert(!Siwe.verify(res, sig, nil, "totallyrandom", "2021-12-16T20:22:39.911Z") == true)
     # succeed with all
-    assert(Siwe.verify(res, sig, "login.xyz", "ToTaLLyRanDOM", "2021-12-16T20:22:39.911Z") == true)
+    assert(
+      Siwe.verify(res, sig, "login.xyz", "ToTaLLyRanDOM", "2021-12-16T20:22:39.911Z") == true
+    )
   end
 
   # TODO: Add test for time using on-fly-generated message and sig, requiring local key to test?
